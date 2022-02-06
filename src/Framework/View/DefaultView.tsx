@@ -1,8 +1,8 @@
 import React, { Component, ReactNode } from "react";
 import { hot } from "react-hot-loader/root";
-import wordslib from '../../Data/wordslib.json'
+import wordsLib from '../../Data/wordslib.json'
 
-const TODAY_WORD = wordslib[Math.floor(Math.random()*wordslib.length)]
+const TODAY_WORD = wordsLib[Math.floor(Math.random()*wordsLib.length)]
 
 class DefaultView extends Component {
   state = {
@@ -39,7 +39,6 @@ class DefaultView extends Component {
     this.setState((prevState) => {
       // @ts-ignore
       let currentWords = prevState.words
-
       currentWords[currentIndex].push(letter)
       return {
         ...prevState,
@@ -52,10 +51,16 @@ class DefaultView extends Component {
     const {words, solved} = this.state
 
     if (solved) {
-      return false
+      return
+     }
+
+    let currentIndex = -1
+    try {
+      currentIndex = this.getCurrentIndex()
+    } catch (e) {
+      return
     }
 
-    let currentIndex = this.getCurrentIndex()
     if (sendOrDelete === 'ENVIAR') {
 
       if (words[currentIndex].length !== 5) {
@@ -68,7 +73,7 @@ class DefaultView extends Component {
 
         const proposed = words[currentIndex].join('')
 
-        if (!wordslib.includes(proposed)) {
+        if (!wordsLib.includes(proposed)) {
           alert('La palabra no está en el diccionario')
           return prevState
         }
@@ -133,14 +138,13 @@ class DefaultView extends Component {
   }
 
   render(): ReactNode {
-    const {words, sent} = this.state
+    const {words, sent, solved} = this.state
 
     const Button = (props: { letter: string, color: string }) => <button
       style={{
-        marginLeft: '0.1rem',
-        marginRight: '0.1rem',
         backgroundColor: props.color,
-        padding: '1rem'
+        width: '4rem',
+        height: '2.5rem',
       }}
       onClick={() => {
         const letter = props.letter.toUpperCase()
@@ -149,10 +153,18 @@ class DefaultView extends Component {
           return
         }
 
-        if (!this.canSendLetter()) {
-          return
+        let canSend = false
 
+        try {
+          canSend = this.canSendLetter()
+        } catch (e) {
+          return
         }
+
+        if (!canSend) {
+          return
+        }
+
         this.onLetterClicked(props.letter.toUpperCase())
       }}>{props.letter.toUpperCase()}
     </button>
@@ -167,15 +179,15 @@ class DefaultView extends Component {
             }
           }
 
-          return <Button letter={letter} color={color}/>
+          return <Button key={letter} letter={letter} color={color}/>
         }
       )}
     </div>
 
     const Box = (props: { letter?: string, color?: string } = {letter: '', color: 'gray'}) => <div style={{
       display: 'inline-block',
-      width: '4rem',
-      height: '4rem',
+      width: '3rem',
+      height: '3rem',
       marginLeft: '0.1rem',
       marginRight: '0.1rem',
       backgroundColor: props.color,
@@ -183,7 +195,7 @@ class DefaultView extends Component {
       textAlign: 'center',
       color: 'white',
       fontSize: '2rem',
-    }}>{props.letter}</div>
+    }}>&nbsp;{props.letter}&nbsp;</div>
 
     let mesh = []
     let row = []
@@ -205,19 +217,24 @@ class DefaultView extends Component {
           }
         }
 
-        row[j] = <Box letter={rowWord[j] ?? ''} color={color}/>
+        row[j] = <Box key={`${i}${j}`} letter={rowWord[j] ?? ''} color={color}/>
       }
 
       mesh.push(row)
     }
 
-    const Mesh = (props: { elements: unknown[][] }) => <>{props.elements.map((row) => <div
-      style={{display: 'table', margin: '1rem auto'}}>{row}</div>)}</>
+    const Mesh = (props: { elements: unknown[][] }) => <>{props.elements.map((row, index) => <div key={index}
+      style={{display: 'table', margin: '0.5rem auto'}}>{row}</div>)}</>
 
     return <React.Fragment>
-      {sent.length === 5 && (<div style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>
-        <p>La palabra era: <b>{TODAY_WORD}</b></p>
+      {(sent.length === 5 && sent[4] !== TODAY_WORD) && (<div style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>
+        <p>La palabra era: <b><a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a></b></p>
       </div>)}
+
+      {solved && (<div style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>
+        <a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a>
+      </div>)}
+
       {/*<h4 style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>{TODAY_WORD}</h4>*/}
       <div style={{width: '100%'}}>
         <Mesh elements={mesh}/>
