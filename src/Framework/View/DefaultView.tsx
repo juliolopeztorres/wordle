@@ -1,6 +1,7 @@
 import React, { Component, ReactNode } from "react";
 import { hot } from "react-hot-loader/root";
 import wordsLib from '../../Data/wordslib.json'
+import Button from '@material-ui/core/Button';
 
 const TODAY_WORD = wordsLib[Math.floor(Math.random()*wordsLib.length)]
 
@@ -140,12 +141,8 @@ class DefaultView extends Component {
   render(): ReactNode {
     const {words, sent, solved} = this.state
 
-    const Button = (props: { letter: string, color: string }) => <button
-      style={{
-        backgroundColor: props.color,
-        width: '4rem',
-        height: '2.5rem',
-      }}
+    const KeyboardButton = (props: { letter: string, color: string }) => <Button
+      variant="outlined"
       onClick={() => {
         const letter = props.letter.toUpperCase()
         if(['ENVIAR', 'BORRAR'].includes(letter)){
@@ -167,7 +164,7 @@ class DefaultView extends Component {
 
         this.onLetterClicked(props.letter.toUpperCase())
       }}>{props.letter.toUpperCase()}
-    </button>
+    </Button>
 
     const Row = (props: { row: string[] }) => <div style={{display: 'table', margin: '1rem auto'}}>
       {props.row.map(
@@ -179,7 +176,7 @@ class DefaultView extends Component {
             }
           }
 
-          return <Button key={letter} letter={letter} color={color}/>
+          return <KeyboardButton key={letter} letter={letter} color={color}></KeyboardButton>
         }
       )}
     </div>
