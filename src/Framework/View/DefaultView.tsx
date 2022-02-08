@@ -153,7 +153,29 @@ class DefaultView extends Component {
       }}>{props.letter.toUpperCase()}
     </Button>
 
-    const Row = (props: { row: string[] }) => <div style={{display: 'table', margin: '1rem auto'}}>
+    const SendButton = () => <Button
+      variant="outlined"
+      onClick={() => {
+          this.onSpecialKeyClicked('ENVIAR');
+          return
+      }}>
+      <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">
+        <path d="M15.5 4.4C9.5 7.2 6.8 10 4.1 16 .5 23.9 2.2 34.3 8.3 40.9 11.6 44.5 19.8 48 25 48c5.2 0 13.4-3.5 16.7-7.1 3.4-3.7 6.3-11 6.3-15.9 0-5.2-3.5-13.4-7.1-16.7C37.2 4.9 29.9 2 25 2c-2.7 0-6.5 1-9.5 2.4zM31 16.5c2.9 3 5.1 5.8 4.7 6.2-.4.4-2.8-1.3-5.2-3.7L26 14.6v12.2c0 7.5-.4 12.2-1 12.2s-1-4.7-1-12.2V14.6L19.5 19c-2.4 2.4-4.8 4.1-5.2 3.7C13.7 22 23.7 11 25 11c.3 0 3 2.5 6 5.5z"/>
+      </svg>
+    </Button>
+
+    const DeleteButton = () => <Button
+      variant="outlined"
+      onClick={() => {
+        this.onSpecialKeyClicked('BORRAR');
+        return
+      }}>
+      <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
+        <path d="M4.8 9.2C.8 14.6.7 14.8 4 19.5l3.1 4.6 10.7-.3 10.7-.3v-17l-10.6-.3-10.6-.3-2.5 3.3zm10.4 2.5c1.7 1.5 1.9 1.5 3.8-.2 2.6-2.4 3.9-1.1 1.5 1.5-1.7 1.9-1.7 2.1 0 4 2.4 2.6 1.1 3.9-1.5 1.5-1.9-1.7-2.1-1.7-4 0-2.6 2.4-3.9 1.1-1.5-1.5 1.7-1.9 1.7-2.1.2-3.8-3-3.3-1.8-4.5 1.5-1.5z"/>
+      </svg>
+    </Button>
+
+    const Row = (props: { row: string[] }) => <div className="row">
       {props.row.map(
         (letter) => {
           let color = 'darkgray'
@@ -161,6 +183,14 @@ class DefaultView extends Component {
             if (!TODAY_WORD.includes(letter.toUpperCase())) {
               color = 'white'
             }
+          }
+
+          if(letter.includes('Enviar')) {
+            return <SendButton></SendButton>
+          }
+
+          if(letter.includes('Borrar')) {
+            return <DeleteButton></DeleteButton>
           }
 
           return <KeyboardButton letter={letter} color={color}></KeyboardButton>
@@ -215,11 +245,11 @@ class DefaultView extends Component {
         <p>La palabra era: <b>{TODAY_WORD}</b></p>
       </div>)}
       {/*<h4 style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>{TODAY_WORD}</h4>*/}
-      <div style={{width: '100%'}}>
+      <div className="board">
         <Mesh elements={mesh}/>
       </div>
       &nbsp;
-      <div style={{width: '100%'}}>
+      <div className="keyboard">
         <Row row={['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']}/>
         <Row row={['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ñ']}/>
         <Row row={['Enviar', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'Borrar']}/>
