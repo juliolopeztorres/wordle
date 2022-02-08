@@ -211,18 +211,10 @@ class DefaultView extends Component {
       )}
     </div>
 
-    const Box = (props: { letter?: string, color?: string } = {letter: '', color: 'gray'}) => <div style={{
-      display: 'inline-block',
-      width: '3rem',
-      height: '3rem',
-      marginLeft: '0.1rem',
-      marginRight: '0.1rem',
-      backgroundColor: props.color,
-      border: '2px solid black',
-      textAlign: 'center',
-      color: 'white',
-      fontSize: '2rem',
-    }}>&nbsp;{props.letter}&nbsp;</div>
+    const Box = (props: { letter?: string, color?: string } = {letter: '', color: 'gray'}) => <Button
+      className={`board__word__letter  ${props.color}`}
+      variant="outlined"
+      disabled>&nbsp;{props.letter}&nbsp;</Button>
 
     let mesh = []
     let row = []
@@ -232,15 +224,15 @@ class DefaultView extends Component {
       row = []
       rowWord = words[i]
       for (let j = 0; j < 5; j++) {
-        color = 'gray'
+        color = 'primary'
 
         if(sent[i]) {
           if (rowWord[j] === TODAY_WORD[j]) {
-            color = 'green'
+            color = 'success'
           } else if (TODAY_WORD.includes(rowWord[j])) {
-            color = 'darksalmon'
+            color = 'warn'
           } else {
-            color = 'black'
+            color = 'error'
           }
         }
 
@@ -251,7 +243,7 @@ class DefaultView extends Component {
     }
 
     const Mesh = (props: { elements: unknown[][] }) => <>{props.elements.map((row, index) => <div key={index}
-      style={{display: 'table', margin: '0.5rem auto'}}>{row}</div>)}</>
+      className="board__word">{row}</div>)}</>
 
     return <React.Fragment>
       {(sent.length === 5 && sent[4] !== TODAY_WORD) && (<div style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>
