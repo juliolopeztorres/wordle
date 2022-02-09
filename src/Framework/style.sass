@@ -1,11 +1,11 @@
 $body-color: #d4d4d473
 
+$primary: rgb(50, 98, 115)
 $primary-color: rgb(50, 98, 115)
 $secondary-color: rgb(238, 238, 238)
 $error-color: rgb(247, 175, 157)
 $warn-color: rgb(247, 227, 175)
 $success-color: rgb(140, 179, 105)
-
 
 body
   background-color: $body-color
@@ -13,25 +13,25 @@ body
 svg
     height: 25px
 
-
-
 .keyboard
   .row
     display: flex
     Button
       min-width: 0
 
+.info
+  padding: 20px 0
+  min-height: 70px
+
 .board
-  display: flex
-  flex-direction: column
-  width: max-content
-  margin: auto
   &__word
     margin: 5px 0
     &__letter
       height: 50px
       width: 50px
       margin: 2px
+      font-size: 25px !important
+      font-weight: bold !important
       &.primary
         background-color: $secondary-color
       &.success
@@ -44,3 +44,14 @@ svg
         color: rgba(0, 0, 0, 0.87)
       &.MuiButton-outlined.Mui-disabled
         border: 1px solid rgba(0, 0, 0, 0.23)
+
+.board,
+.info,
+.keyboard
+  display: flex
+  flex-direction: column
+  width: max-content
+  margin: auto
+
+.MuiAlert-standard
+  align-items: center
