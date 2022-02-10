@@ -1,6 +1,6 @@
 import React, { Component, ReactNode } from "react";
 import { hot } from "react-hot-loader/root";
-import wordslib from '../../Data/wordslib.json';
+import wordsLib from '../../Data/wordslib.json';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
@@ -9,7 +9,7 @@ import SendIcon from '@mui/icons-material/Send';
 import ReplaySharpIcon from '@mui/icons-material/ReplaySharp';
 import Alert from '@mui/material/Alert';
 
-const TODAY_WORD = wordslib[Math.floor(Math.random()*wordslib.length)]
+const TODAY_WORD = wordsLib[Math.floor(Math.random()*wordsLib.length)]
 
 class DefaultView extends Component {
   state = {
@@ -47,7 +47,6 @@ class DefaultView extends Component {
     this.setState((prevState) => {
       // @ts-ignore
       let currentWords = prevState.words
-
       currentWords[currentIndex].push(letter)
       return {
         ...prevState,
@@ -59,9 +58,16 @@ class DefaultView extends Component {
   onSpecialKeyClicked(sendOrDelete: string) {
     const {words, solved} = this.state;
     if (solved) {
-      return false;
+      return
+     }
+
+    let currentIndex = -1
+    try {
+      currentIndex = this.getCurrentIndex()
+    } catch (e) {
+      return
     }
-    let currentIndex = this.getCurrentIndex()
+
     if (sendOrDelete === 'ENVIAR') {
       if (words[currentIndex].length !== 5) {
         return;
@@ -72,11 +78,11 @@ class DefaultView extends Component {
 
         const proposed = words[currentIndex].join('')
 
-        if (!wordslib.includes(proposed)) {
+        if (!wordsLib.includes(proposed)) {
           return {
-            ...prevState, 
+            ...prevState,
             notValidWord: true
-          };
+          }
         }
 
         // @ts-ignore
@@ -104,7 +110,8 @@ class DefaultView extends Component {
       words[currentIndex].pop()
       return {
         ...prevState,
-        words: words
+        words: words,
+        notValidWord: false
       }
     })
   }
@@ -164,10 +171,18 @@ class DefaultView extends Component {
           return
         }
 
-        if (!this.canSendLetter()) {
-          return
+        let canSend = false
 
+        try {
+          canSend = this.canSendLetter()
+        } catch (e) {
+          return
         }
+
+        if (!canSend) {
+          return
+        }
+
         this.onLetterClicked(props.letter.toUpperCase())
       }}>{props.letter.toUpperCase()}
     </Button>
@@ -201,14 +216,14 @@ class DefaultView extends Component {
           }
 
           if(letter.includes('Enviar')) {
-            return <SendButton></SendButton>
+            return <SendButton key={'Enviar'}/>
           }
 
           if(letter.includes('Borrar')) {
-            return <DeleteButton></DeleteButton>
+            return <DeleteButton key={'Borrar'}/>
           }
 
-          return <KeyboardButton letter={letter} disabled={disabled}></KeyboardButton>
+          return <KeyboardButton key={letter} letter={letter} disabled={disabled}/>
         }
       )}
     </div>
@@ -241,20 +256,25 @@ class DefaultView extends Component {
           }
         }
 
-        row[j] = <Box letter={rowWord[j] ?? ''} color={color}/>
+        row[j] = <Box key={`${i}${j}`} letter={rowWord[j] ?? ''} color={color}/>
       }
 
       mesh.push(row)
     }
 
-    const Mesh = (props: { elements: unknown[][] }) => <>{props.elements.map((row) => <div
+    const Mesh = (props: { elements: unknown[][] }) => <>{props.elements.map((row, index) => <div key={index}
       className="board__word">{row}</div>)}</>
 
     return <React.Fragment>
-      {sent.length === 5 && (<div style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>
-        <p>La palabra era: <b>{TODAY_WORD}</b></p>
+      {(sent.length === 5 && sent[4] !== TODAY_WORD) && (<div style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>
+        <p>La palabra era: <b><a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a></b></p>
       </div>)}
-      {<h4 style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>{TODAY_WORD}</h4>}
+
+      {solved && (<div style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>
+        <a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a>
+      </div>)}
+
+      <h4 style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>{TODAY_WORD}</h4>
       <div className="board">
         <Mesh elements={mesh}/>
       </div>
@@ -273,13 +293,24 @@ class DefaultView extends Component {
         { solved &&
         <Alert 
         action={
-          <IconButton color="primary" aria-label="limpiar palabra" component="span"
+          <IconButton color="primary" aria-label="reiniciar" component="span"
             onClick={() => {window.location.reload();}}>
             <ReplaySharpIcon sx={{ fontSize: 20 }} />
           </IconButton>
         }
         severity="success">
           Enhorabuena, ha acertado la palabra
+        </Alert>}
+        {sent.length === 5 && !solved && 
+        <Alert 
+        action={
+          <IconButton color="primary" aria-label="reiniciar" component="span"
+            onClick={() => {window.location.reload();}}>
+            <ReplaySharpIcon sx={{ fontSize: 20 }} />
+          </IconButton>
+        }
+        severity="error">
+          La palabra era: <b>{TODAY_WORD}</b>
         </Alert>}
       </div>
       <div className="keyboard">
