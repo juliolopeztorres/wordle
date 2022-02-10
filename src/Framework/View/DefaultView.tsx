@@ -1,7 +1,7 @@
 import React, { Component, ReactNode } from "react";
 import { hot } from "react-hot-loader/root";
 import wordsLib from '../../Data/wordslib.json'
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import BackspaceIcon from '@mui/icons-material/Backspace';
@@ -215,11 +215,11 @@ class DefaultView extends Component {
           }
 
           if(letter.includes('Enviar')) {
-            return <SendButton/>
+            return <SendButton key={'Enviar'}/>
           }
 
           if(letter.includes('Borrar')) {
-            return <DeleteButton/>
+            return <DeleteButton key={'Borrar'}/>
           }
 
           return <KeyboardButton key={letter} letter={letter} disabled={disabled}/>
