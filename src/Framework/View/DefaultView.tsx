@@ -1,6 +1,7 @@
 import React, { Component, ReactNode } from "react";
 import { hot } from "react-hot-loader/root";
 import wordsLib from '../../Data/wordslib.json'
+import { Col, Container, Row as RowBt, Button as ButtonBt } from 'react-bootstrap';
 
 const TODAY_WORD = wordsLib[Math.floor(Math.random()*wordsLib.length)]
 
@@ -61,7 +62,7 @@ class DefaultView extends Component {
       return
     }
 
-    if (sendOrDelete === 'ENVIAR') {
+    if (sendOrDelete === '^') {
 
       if (words[currentIndex].length !== 5) {
         return
@@ -140,15 +141,15 @@ class DefaultView extends Component {
   render(): ReactNode {
     const {words, sent, solved} = this.state
 
-    const Button = (props: { letter: string, color: string }) => <button
+    const Button = (props: { letter: string, variant: string }) => <ButtonBt
+      variant={props.variant}
       style={{
-        backgroundColor: props.color,
-        width: '4rem',
-        height: '2.5rem',
+        height: '3.25rem',
+        border: '1px solid #000'
       }}
       onClick={() => {
         const letter = props.letter.toUpperCase()
-        if(['ENVIAR', 'BORRAR'].includes(letter)){
+        if(['^', '<--'].includes(letter)){
           this.onSpecialKeyClicked(letter)
           return
         }
@@ -167,33 +168,32 @@ class DefaultView extends Component {
 
         this.onLetterClicked(props.letter.toUpperCase())
       }}>{props.letter.toUpperCase()}
-    </button>
+    </ButtonBt>
 
-    const Row = (props: { row: string[] }) => <div style={{display: 'table', margin: '1rem auto'}}>
+    const Row = (props: { row: string[] }) => <RowBt>
       {props.row.map(
         (letter) => {
-          let color = 'darkgray'
-          if (!['Enviar', 'Borrar'].includes(letter) && this.isLetterSent(letter.toUpperCase())) {
+          let variant = 'dark'
+          if (!['^', '<--'].includes(letter) && this.isLetterSent(letter.toUpperCase())) {
             if (!TODAY_WORD.includes(letter.toUpperCase())) {
-              color = 'white'
+              variant = 'light'
             }
           }
 
-          return <Button key={letter} letter={letter} color={color}/>
+          return <Col style={{margin: 0.5, padding: 0}} className={'d-grid'}><Button key={letter} letter={letter} variant={variant}/></Col>
         }
       )}
-    </div>
+    </RowBt>
 
     const Box = (props: { letter?: string, color?: string } = {letter: '', color: 'gray'}) => <div style={{
       display: 'inline-block',
-      width: '3rem',
-      height: '3rem',
+      width: '3.25rem',
+      height: '3.25rem',
       marginLeft: '0.1rem',
       marginRight: '0.1rem',
       backgroundColor: props.color,
-      border: '2px solid black',
+      border: '1px solid #333',
       textAlign: 'center',
-      color: 'white',
       fontSize: '2rem',
     }}>&nbsp;{props.letter}&nbsp;</div>
 
@@ -226,31 +226,30 @@ class DefaultView extends Component {
     const Mesh = (props: { elements: unknown[][] }) => <>{props.elements.map((row, index) => <div key={index}
       style={{display: 'table', margin: '0.5rem auto'}}>{row}</div>)}</>
 
-    return <React.Fragment>
-      {(sent.length === 5 && sent[4] !== TODAY_WORD) && (<div style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>
-        <p>La palabra era: <b><a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a></b></p>
-      </div>)}
-
-      {solved && (<div style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>
-        <a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a>
-      </div>)}
-
+    return <Container style={{height: '100vh'}}>
       {/*<h4 style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>{TODAY_WORD}</h4>*/}
-      <div style={{width: '100%'}}>
-        <Mesh elements={mesh}/>
-      </div>
-      &nbsp;
-      <div style={{width: '100%'}}>
-        <Row row={['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']}/>
-        <Row row={['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ñ']}/>
-        <Row row={['Enviar', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'Borrar']}/>
-      </div>
-      &nbsp;
-      {/*<div style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>*/}
-      {/*  {sent.length > 0 && sent.map((word) => <p>{word}</p>)}*/}
-      {/*</div>*/}
+      {(sent.length === 5 && sent[4] !== TODAY_WORD) && (<RowBt>
+        <Col className={'text-center mb-3'}>
+          <span>La palabra era: <b><a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a></b></span>
+        </Col>
+      </RowBt>)}
 
-    </React.Fragment>
+      {solved && (<RowBt>
+        <Col className={'text-center mb-3'}>
+          <a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a>
+        </Col>
+      </RowBt>)}
+
+      <RowBt className={'mb-3'}>
+        <Col>
+          <Mesh elements={mesh}/>
+        </Col>
+      </RowBt>
+
+      <Row row={['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']}/>
+      <Row row={['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ñ']}/>
+      <Row row={['^', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '<--']}/>
+    </Container>
   }
 }
 
