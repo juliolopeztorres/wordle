@@ -163,7 +163,8 @@ class DefaultView extends Component {
 
     const KeyboardButton = (props: { letter: string, disabled: boolean }) => <Button
       variant="outlined"
-      disabled={props.disabled}
+      disableRipple
+      className={props.disabled ? "disabled" : ""}
       onClick={() => {
         const letter = props.letter.toUpperCase()
         if(['ENVIAR', 'BORRAR'].includes(letter)){
@@ -189,6 +190,7 @@ class DefaultView extends Component {
 
     const SendButton = () => <Button
       variant="outlined"
+      disableRipple
       onClick={() => {
           this.onSpecialKeyClicked('ENVIAR');
           return
@@ -274,7 +276,6 @@ class DefaultView extends Component {
         <a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a>
       </div>)}
 
-      <h4 style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>{TODAY_WORD}</h4>
       <div className="board">
         <Mesh elements={mesh}/>
       </div>

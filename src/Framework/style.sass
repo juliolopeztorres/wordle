@@ -14,21 +14,35 @@ body
 svg
     height: 25px
 
+.App
+  width: 100%
+  height: 100%
+  position: absolute
+  overflow: hidden
+
 .keyboard
-  display: block
+  height: 35%
+  display: flex
+  flex-direction: column
+  justify-content: center
   .row
     display: flex
     Button
       min-width: 0
       flex: 1
-
-.info
-  padding: 20px 0
-  min-height: 70px
+      height: 50px
+      &.disabled
+        background-color: $error-color
 
 .board
+  height: 50%
+  margin: auto
+  width: fit-content
+  display: flex
+  flex-direction: column
+  justify-content: center
+  padding-top: 10px
   &__word
-    margin: 5px 0
     &__letter
       height: 50px
       width: 50px
@@ -48,12 +62,14 @@ svg
       &.MuiButton-outlined.Mui-disabled
         border: 1px solid rgba(0, 0, 0, 0.23)
 
-.board,
 .info
+  height: 15%
+  padding: 0
   display: flex
   flex-direction: column
-  width: max-content
+  width: fit-content
   margin: auto
+  justify-content: center
 
 .MuiAlert-standard
   align-items: center
