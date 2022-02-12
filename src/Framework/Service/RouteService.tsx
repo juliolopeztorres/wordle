@@ -10,14 +10,12 @@ const serviceContainer: ServiceContainerInterface = new ServiceContainer();
 
 export default function RouteService() {
   return (
-    <div className="App">
-      <Switch>
-        <Route exact path={getRoute('home')}>
-          <DefaultView/>
-        </Route>
-        <h1>404 - Route not found</h1>
-      </Switch>
-    </div>
+    <Switch>
+      <Route exact path={getRoute('home')}>
+        <DefaultView/>
+      </Route>
+      <h1>404 - Route not found</h1>
+    </Switch>
   );
 }
 
