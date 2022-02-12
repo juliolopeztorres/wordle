@@ -1,7 +1,7 @@
 import React, { Component, ReactNode } from "react";
 import { hot } from "react-hot-loader/root";
 import wordsLib from '../../Data/wordslib.json'
-import { Col, Container, Row as RowBt, Button as ButtonBt } from 'react-bootstrap';
+import { Container, Button as ButtonBt, Toast, ToastContainer, Alert } from 'react-bootstrap';
 
 const TODAY_WORD = wordsLib[Math.floor(Math.random()*wordsLib.length)]
 
@@ -9,7 +9,8 @@ class DefaultView extends Component {
   state = {
     words: [[], [], [], [], []],
     sent: [],
-    solved: false
+    solved: false,
+    show: false
   }
 
   // @ts-ignore
@@ -62,7 +63,7 @@ class DefaultView extends Component {
       return
     }
 
-    if (sendOrDelete === '^') {
+    if (sendOrDelete === 'ENVIAR') {
 
       if (words[currentIndex].length !== 5) {
         return
@@ -75,8 +76,10 @@ class DefaultView extends Component {
         const proposed = words[currentIndex].join('')
 
         if (!wordsLib.includes(proposed)) {
-          alert('La palabra no está en el diccionario')
-          return prevState
+          return {
+            ...prevState,
+            show: true
+          }
         }
 
         // @ts-ignore
@@ -139,17 +142,20 @@ class DefaultView extends Component {
   }
 
   render(): ReactNode {
-    const {words, sent, solved} = this.state
+    const {words, sent, solved, show} = this.state
 
     const Button = (props: { letter: string, variant: string }) => <ButtonBt
+      className={'rounded text-uppercase fw-bold flex-grow-1 flex-shrink-1 p-1 p-sm-2'}
       variant={props.variant}
       style={{
         height: '3.25rem',
-        border: '1px solid #000'
+        fontSize: '0.875rem',
+        lineHeight: '1.25rem',
+        flexBasis: '0%'
       }}
       onClick={() => {
         const letter = props.letter.toUpperCase()
-        if(['^', '<--'].includes(letter)){
+        if(['ENVIAR', 'BORRAR'].includes(letter)){
           this.onSpecialKeyClicked(letter)
           return
         }
@@ -170,31 +176,26 @@ class DefaultView extends Component {
       }}>{props.letter.toUpperCase()}
     </ButtonBt>
 
-    const Row = (props: { row: string[] }) => <RowBt>
+    const Row = (props: { row: string[] }) => <div className={'d-flex gap-1'}>
       {props.row.map(
         (letter) => {
           let variant = 'dark'
-          if (!['^', '<--'].includes(letter) && this.isLetterSent(letter.toUpperCase())) {
+          if (!['ENVIAR', 'BORRAR'].includes(letter) && this.isLetterSent(letter.toUpperCase())) {
             if (!TODAY_WORD.includes(letter.toUpperCase())) {
               variant = 'light'
             }
           }
 
-          return <Col style={{margin: 0.5, padding: 0}} className={'d-grid'}><Button key={letter} letter={letter} variant={variant}/></Col>
+          return <Button key={letter} letter={letter} variant={variant}/>
         }
       )}
-    </RowBt>
+    </div>
 
-    const Box = (props: { letter?: string, color?: string } = {letter: '', color: 'gray'}) => <div style={{
-      display: 'inline-block',
-      width: '3.25rem',
-      height: '3.25rem',
-      marginLeft: '0.1rem',
-      marginRight: '0.1rem',
-      backgroundColor: props.color,
-      border: '1px solid #333',
-      textAlign: 'center',
-      fontSize: '2rem',
+    const Box = (props: { letter?: string, color?: string } = {letter: '', color: 'gray'}) => <div
+      className={'w-100 h-100 d-inline-flex justify-content-center align-items-center text-uppercase fw-bold user-select-none fs-2'}
+      style={{
+        backgroundColor: props.color,
+        border: '2px solid #666',
     }}>&nbsp;{props.letter}&nbsp;</div>
 
     let mesh = []
@@ -223,32 +224,59 @@ class DefaultView extends Component {
       mesh.push(row)
     }
 
-    const Mesh = (props: { elements: unknown[][] }) => <>{props.elements.map((row, index) => <div key={index}
-      style={{display: 'table', margin: '0.5rem auto'}}>{row}</div>)}</>
+    const Mesh = (props: { elements: unknown[][] }) => <>{props.elements.map((row, index) => <div
+      key={index}
+      className={'d-grid gap-1 w-100'}
+      style={{
+        gridTemplateColumns: 'repeat(5,minmax(0,1fr))',
+      }}>
+      {row}</div>)}</>
 
-    return <Container style={{height: '100vh'}}>
+    return <Container className={'d-flex flex-column w-100 lg px-2'} style={{height: '100vh'}}>
+      <ToastContainer position={'top-center'} style={{zIndex: 1}}>
+        <Toast className="d-inline-block" bg={'dark'} delay={1500} onClose={
+          () => this.setState((prevState) => {
+            return {
+              ...prevState,
+              show: false
+            }
+          })
+        } show={show} autohide>
+          <Toast.Header>
+            <strong className="me-auto">Ups ¯\_(ツ)_/¯</strong>
+          </Toast.Header>
+          <Toast.Body>La palabra no está en el diccionario</Toast.Body>
+        </Toast>
+      </ToastContainer>
+
       {/*<h4 style={{margin: '1rem auto', width: '100%', textAlign: 'center'}}>{TODAY_WORD}</h4>*/}
-      {(sent.length === 5 && sent[4] !== TODAY_WORD) && (<RowBt>
-        <Col className={'text-center mb-3'}>
-          <span>La palabra era: <b><a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a></b></span>
-        </Col>
-      </RowBt>)}
+      {(sent.length === 5 && sent[4] !== TODAY_WORD) && (<Alert variant={'dark'} className={'text-center'}>
+        La palabra era: <b><a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a></b>
+      </Alert>)}
 
-      {solved && (<RowBt>
-        <Col className={'text-center mb-3'}>
-          <a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a>
-        </Col>
-      </RowBt>)}
+      {solved && (<Alert variant={'dark'} className={'text-center'}>
+        <a href={`https://dle.rae.es/${TODAY_WORD}`} target={'_blank'}>{TODAY_WORD}</a>
+      </Alert>)}
 
-      <RowBt className={'mb-3'}>
-        <Col>
+      <main className={'d-flex flex-fill justify-content-center align-items-center'}>
+        <div
+          className={'d-grid position-relative gap-1 p-3 w-100 h-100'}
+          style={{
+            gridTemplateRows: 'repeat(6,minmax(0,1fr))',
+            boxSizing: 'border-box',
+            maxWidth: '350px',
+            maxHeight: '420px',
+        }}
+        >
           <Mesh elements={mesh}/>
-        </Col>
-      </RowBt>
+        </div>
+      </main>
 
-      <Row row={['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']}/>
-      <Row row={['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ñ']}/>
-      <Row row={['^', 'z', 'x', 'c', 'v', 'b', 'n', 'm', '<--']}/>
+      <div className={'d-flex flex-column pb-2 gap-2 pb-md-5 w-100'}>
+        <Row row={['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']}/>
+        <Row row={['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ñ']}/>
+        <Row row={['enviar', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'borrar']}/>
+      </div>
     </Container>
   }
 }
