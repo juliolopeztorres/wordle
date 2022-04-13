@@ -8,38 +8,41 @@ import Mesh from './Component/Mesh';
 import Keyboard from './Component/Keyboard';
 import FinishResult from './Component/FinishResult';
 import Alert from './Component/Alert';
+import Restart from './Component/Restart';
 
-const TODAY_WORD = wordsLib[Math.floor(Math.random() * wordsLib.length)]
+let TODAY_WORD = wordsLib[Math.floor(Math.random() * wordsLib.length)]
+
+const initSentWordsState: string[] = []
+const initLettersArrayState: string[][] = [[], [], [], [], []]
 
 const DefaultView = () => {
-  const [sent, setSent] = useState<string[]>([])
-  const [words, setWords] = useState<string[][]>([[], [], [], [], []])
+  const [sentWords, setSentWords] = useState<string[]>(initSentWordsState)
+  const [lettersArray, setLettersArray] = useState<string[][]>(initLettersArrayState)
   const [solved, setSolved] = useState<boolean>(false)
-  const [show, setShow] = useState<boolean>(false)
+  const [showAlert, setShowAlertAlert] = useState<boolean>(false)
 
   const getMesh = () => {
     let mesh = []
     let row = []
-    let rowWord = []
+    let letters = []
     let color = ''
 
     for (let i = 0; i < 5; i++) {
       row = []
-      rowWord = words[i]
+      letters = lettersArray[i]
       for (let j = 0; j < 5; j++) {
-        color = 'gray'
 
-        if (sent[i]) {
-          if (rowWord[j] === TODAY_WORD[j]) {
+        color = 'gray'
+        if (sentWords[i]) {
+          color = 'black'
+          if (letters[j] === TODAY_WORD[j]) {
             color = 'green'
-          } else if (TODAY_WORD.includes(rowWord[j])) {
-            color = 'darksalmon'
-          } else {
-            color = 'black'
+          } else if (TODAY_WORD.includes(letters[j])) {
+            color = '#ffbf44'
           }
         }
 
-        row[j] = <Box key={`${i}${j}`} letter={rowWord[j] ?? ''} color={color}/>
+        row[j] = <Box key={`${i}${j}`} letter={letters[j] ?? ''} color={color}/>
       }
 
       mesh.push(row)
@@ -48,33 +51,21 @@ const DefaultView = () => {
     return mesh
   }
 
-  const getCurrentIndex = () => {
-    const currentIndex = sent.length
-
-    if (currentIndex === 5) {
-      throw new Error('No more rows to be filled')
-    }
-
-    return currentIndex
+  const getCurrentTryRow = () => {
+    return sentWords.length
   }
 
   const canSendLetter = () => {
-    if (solved) {
+    try {
+      return !solved && lettersArray[getCurrentTryRow()].length !== 5
+    } catch {
       return false
     }
-
-    if (words[getCurrentIndex()].length === 5) {
-      console.log('No se puede mandar más letras. ENVIAR')
-      return false
-    }
-
-    return true
   }
 
   const isLetterSent = (letter: string) => {
-    for (const letterSent of sent) {
-      // @ts-ignore
-      if (letterSent.includes(letter)) {
+    for (const sentWord of sentWords) {
+      if (sentWord.includes(letter)) {
         return true
       }
     }
@@ -83,73 +74,72 @@ const DefaultView = () => {
   }
 
   const onLetterClicked = (letter: string) => {
-    let currentIndex = getCurrentIndex()
+    let currentTryRow = getCurrentTryRow()
 
-    if (currentIndex === -1) {
-      console.error('No se ha calculado bien el índice')
-      return
-    }
+    let currentLettersArray = [...lettersArray]
+    currentLettersArray[currentTryRow].push(letter)
 
-    let currentWords = [...words]
-    currentWords[currentIndex].push(letter)
-
-    setWords(currentWords)
+    setLettersArray(currentLettersArray)
   }
 
-  const onSpecialKeyClicked = (sendOrDelete: string) => {
-    if (solved) {
+  const onSpecialKeyClicked = (sendClicked: boolean) => {
+    const currentIndex = getCurrentTryRow()
+    if (solved || currentIndex > 4) {
       return
     }
 
-    let currentIndex = -1
-    try {
-      currentIndex = getCurrentIndex()
-    } catch (e) {
-      return
-    }
-
-    if (sendOrDelete === 'ENVIAR') {
-      if (words[currentIndex].length !== 5) {
+    if (sendClicked) {
+      if (canSendLetter()) {
         return
       }
 
-      const proposed = words[currentIndex].join('')
+      const proposed = lettersArray[currentIndex].join('')
 
       if (!wordsLib.includes(proposed)) {
-        setShow(true)
+        setShowAlertAlert(true)
         return
       }
 
-      setSent([...sent, proposed])
+      setSentWords([...sentWords, proposed])
       setSolved(proposed === TODAY_WORD)
       return
     }
 
-    if (currentIndex === -1) {
+    if (lettersArray[currentIndex].length === 0) {
       return
     }
 
-    if (words[currentIndex].length === 0) {
-      return
-    }
-
-    let currentWords = [...words]
+    let currentWords = [...lettersArray]
     currentWords[currentIndex].pop()
 
-    setWords(currentWords)
+    setLettersArray(currentWords)
   }
 
-  let canSend = false
-  try {
-    canSend = canSendLetter()
-  } catch (e) {
+  const isLetterInTodayWord = (letter: string): boolean => {
+    return TODAY_WORD.includes(letter)
+  }
+
+  const playAgain = () => {
+    setSentWords(initSentWordsState)
+    setLettersArray(initLettersArrayState)
+    setSolved(false)
+
+    TODAY_WORD = wordsLib[Math.floor(Math.random() * wordsLib.length)]
   }
 
   return <Container className={'d-flex flex-column w-100 lg px-2'} style={{height: '100vh'}}>
-    <Alert show={show} onCloseCallback={() => setShow(false)}/>
-    <FinishResult word={TODAY_WORD} solved={solved} noMoreTries={(sent.length === 5 && sent[4] !== TODAY_WORD)}/>
+    <Alert show={showAlert} onCloseCallback={() => setShowAlertAlert(false)}/>
+    <Restart show={!solved && sentWords.length !== 5} callback={{playAgain}}/>
+    <FinishResult
+      word={TODAY_WORD}
+      solved={solved}
+      noMoreTries={(sentWords.length === 5 && sentWords[4] !== TODAY_WORD)}
+      callback={{playAgain}}
+    />
     <Mesh elements={getMesh()}/>
-    <Keyboard canSend={canSend} word={TODAY_WORD} callback={{isLetterSent, onLetterClicked, onSpecialKeyClicked}}/>
+    <Keyboard
+      canSend={canSendLetter()}
+      callback={{isLetterSent, isLetterInTodayWord, onLetterClicked, onSpecialKeyClicked}}/>
   </Container>
 }
 

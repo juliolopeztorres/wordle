@@ -1,17 +1,22 @@
 import Button from './Button';
 import React from 'react';
-import {Callback as ButtonCallback} from './Button';
+import { Callback as ButtonCallback } from './Button';
+import { ButtonVariant } from 'react-bootstrap/types';
 
-export interface Callback extends ButtonCallback{
+export interface Callback extends ButtonCallback {
   isLetterSent(letter: string): boolean
+
+  isLetterInTodayWord(letter: string): boolean
 }
 
-const Row = (props: { row: string[], canSend: boolean, word: string, callback: Callback }) => <div className={'d-flex gap-1'}>
+const Row = (props: { row: string[], canSend: boolean, callback: Callback }) => <div className={'d-flex gap-1'}>
   {props.row.map(
     (letter) => {
-      let variant = 'dark'
-      if (!['ENVIAR', 'BORRAR'].includes(letter) && props.callback.isLetterSent(letter.toUpperCase())) {
-        if (!props.word.includes(letter.toUpperCase())) {
+      let variant: ButtonVariant = 'dark'
+      if (!['enviar', 'borrar'].includes(letter) && props.callback.isLetterSent(letter.toUpperCase())) {
+        if (props.callback.isLetterInTodayWord(letter.toUpperCase())) {
+          variant = 'warning'
+        } else {
           variant = 'light'
         }
       }

@@ -1,7 +1,11 @@
-import { Alert } from 'react-bootstrap';
+import { Alert, Button } from 'react-bootstrap';
 import React from 'react';
 
-const FinishResult = (props: {word: string, solved: boolean, noMoreTries: boolean}) => {
+export interface Callback {
+  playAgain(): void
+}
+
+const FinishResult = (props: { word: string, solved: boolean, noMoreTries: boolean, callback: Callback }) => {
   const Link = () => <a href={`https://dle.rae.es/${props.word}`} target={'_blank'}>{props.word}</a>
 
   return <>
@@ -10,7 +14,12 @@ const FinishResult = (props: {word: string, solved: boolean, noMoreTries: boolea
     {(props.solved || props.noMoreTries) && (<Alert variant={'dark'} className={'text-center'}>
       {props.solved && (<Link/>)}
       {props.noMoreTries && (<>La palabra era: <b><Link/></b></>)}
-      </Alert>)}
+      <div style={{marginTop: '1.25rem'}}>
+        <Button variant="outline-primary" className={'shadow-none'} onClick={() => props.callback.playAgain()}>
+          ¿Otro intento?
+        </Button>
+      </div>
+    </Alert>)}
   </>
 }
 
