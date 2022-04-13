@@ -12,12 +12,9 @@ import Restart from './Component/Restart';
 
 let TODAY_WORD = wordsLib[Math.floor(Math.random() * wordsLib.length)]
 
-const initSentWordsState: string[] = []
-const initLettersArrayState: string[][] = [[], [], [], [], []]
-
 const DefaultView = () => {
-  const [sentWords, setSentWords] = useState<string[]>(initSentWordsState)
-  const [lettersArray, setLettersArray] = useState<string[][]>(initLettersArrayState)
+  const [sentWords, setSentWords] = useState<string[]>([])
+  const [lettersArray, setLettersArray] = useState<string[][]>([[], [], [], [], []])
   const [solved, setSolved] = useState<boolean>(false)
   const [showAlert, setShowAlertAlert] = useState<boolean>(false)
 
@@ -120,8 +117,8 @@ const DefaultView = () => {
   }
 
   const playAgain = () => {
-    setSentWords(initSentWordsState)
-    setLettersArray(initLettersArrayState)
+    setSentWords([])
+    setLettersArray([[], [], [], [], []])
     setSolved(false)
 
     TODAY_WORD = wordsLib[Math.floor(Math.random() * wordsLib.length)]
